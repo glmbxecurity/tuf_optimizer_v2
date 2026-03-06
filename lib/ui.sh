@@ -27,15 +27,39 @@ get_summary() {
     echo -e " ${CYN}Gobernador:${NC}  ${YLW}${GOV:-N/A}${NC}"
 
     # Teclado & Sueño
-    local KBD_B="OFF"; local SLEEP="OFF"
-    if [[ $HAS_ASUSCTL -eq 1 ]]; then
-        # Detectar brillo actual: 0=OFF, >0=ON
-        local k_val=$(asusctl -s 2>/dev/null | grep "Keyboard Brightness" | awk '{print $NF}')
-        [[ "$k_val" != "Off" && "$k_val" != "0" && -n "$k_val" ]] && KBD_B="ON"
-        
-        asusctl led-pow-1 --help 2>&1 | grep -q "sleep" && SLEEP="Opt Available"
+    local KBD_S="N/A"; local SLEEP_S="N/A"
+    
+    # Detectar brillo actual vía sysfs (más fiable que asusctl -s)
+    local k_val=0
+    if [[ -f "/sys/class/leds/asus::kbd_backlight/brightness" ]]; then
+        k_val=$(cat "/sys/class/leds/asus::kbd_backlight/brightness")
     fi
-    echo -e " ${CYN}Teclado LED:${NC} ${YLW}${KBD_B}${NC}  |  ${CYN}Modo Sueño:${NC}  ${YLW}${SLEEP}${NC}"
+
+    # Normalizar y formatear Brillo Teclado
+    local b1="Off"; local b2="Low"; local b3="Med"; local b4="High"
+    case "$k_val" in
+        "0") b1="[${YLW}${BOLD}Off${NC}]" ;;
+        "1") b2="[${YLW}${BOLD}Low${NC}]" ;;
+        "2") b3="[${YLW}${BOLD}Med${NC}]" ;;
+        "3") b4="[${YLW}${BOLD}High${NC}]" ;;
+        *)   b1="[${YLW}${BOLD}Off${NC}]" ;;
+    esac
+    KBD_S="1. $b1 | 2. $b2 | 3. $b3 | 4. $b4"
+
+    if [[ $HAS_ASUSCTL -eq 1 ]]; then
+        # Detectar estado de Sueño/Animaciones
+        if asusctl led-pow-1 --help 2>&1 | grep -q "sleep"; then
+            local s_val
+            s_val=$(asusctl led-pow-1 -g 2>/dev/null | grep "Sleep:" | awk '{print $2}')
+            if [[ "$s_val" == "true" ]]; then
+                SLEEP_S="${YLW}Activado (Con Animaciones)${NC}"
+            else
+                SLEEP_S="${YLW}Desactivado${NC}"
+            fi
+        fi
+    fi
+    echo -e " ${CYN}Teclado:${NC}   $KBD_S"
+    echo -e " ${CYN}Sueño LED:${NC} $SLEEP_S"
     
     # Pantallas
     local i=1
