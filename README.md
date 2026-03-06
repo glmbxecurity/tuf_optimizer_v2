@@ -14,6 +14,7 @@
 TUF Optimizer es un script Bash interactivo diseñado para gestionar de forma centralizada todos los parámetros de rendimiento y consumo energético de un portátil Linux. Nació para los modelos ASUS TUF Gaming y ROG, pero incluye soporte degradado para cualquier portátil con Linux que no disponga de las herramientas ASUS específicas.
 
 El objetivo es sencillo: desde un solo menú, con un solo comando, puedes pasar del modo de máximo ahorro de batería al modo gaming, ver el estado real del sistema, diagnosticar problemas de configuración e instalar las herramientas necesarias — todo con persistencia real entre reinicios.
+
 ![image](optimizer.png)
 ---
 
